@@ -1,5 +1,30 @@
 # Findings
 
+## 63A average-current limiting (approved and implemented)
+- Target is 63A; preserve every original protection threshold and timer. Continuous high load can still trip the existing average OCP thresholds, which are also scaled by gears_level.
+- Current actual duty target is fixed at 100%; analog proportional throttle and gear-duty scaling branches are inactive. This change does not reactivate them.
+- Dedicated 83% floor applies only to average-limit-driven downward adjustment when current actual duty and the normal ramp target are both already >=83%; global 15% minimum and startup remain unchanged.
+- The existing peak-limit decision takes priority. At the average-limit floor, the existing over-current status remains set while current is high; no protection is suppressed.
+- Source edits completed in USER/parameter.h and MOTOR_CONTROL/motor_control.c, with Chinese GBK comments and no post-edit verification, as requested.
+
+## 2026-10-13: Remove switch / restore LED3
+- Completed source-only removal/restoration in 12 files. No post-edit static checking or hardware validation was performed, per the user.
+- Actual edits were direct byte-preserving .c/.h replacements, not Python. Original GBK bytes and line endings outside changed spans were retained.
+- Current request supersedes all prior PA14 safety-switch requirements.
+- Safety uses PA14, not PA4 EN. PA4 over-current/emergency fault handling must remain.
+- Integration includes USER board/parameter/LED/main/ISR/user state, DRIVE PWM helpers, and MOTOR_CONTROL startup/brake handling.
+- `LED_PA14_EN=0` plus a compile-time error prevents LED restoration; fault-only mapping and early return also suppress original displays.
+- Source reads are only for edit anchors. No post-edit checking, compilation or flashing.
+- Current `ON_OFF_DIGITAL_EN` is 0 (ADC mode); preserve this actual setting rather than relying on historical notes. Keep the debounce and hard-brake settings unchanged.
+- LED original six-way map, full scan and SOC/gear handler are still present under `LED_PA14_EN`; remove safety-only conditionals to restore them.
+- PWM removal includes repeated polling guards, `Safety_Brake_Motor`, and the safety-aware `PwmOutputsEnable` wrapper; retain ordinary `Brake_Motor` output logic and hardware break configuration.
+- User trigger debounce should remain intact; remove only safety restart counters/latch, latch-specific critical section and user-state gating. Preserve real-time and latched fault checks.
+- Motor state machine should retain normal MOTOR_HBRAKE timing/output and MOTOR_BRAKE2STOP, deleting only the dedicated safety branches and MOS-test polling.
+- GPIO boot currently leaves PWM pins in safety GPIO-low mode until main remuxes them. Restore normal `Bsp_Pwm_Init()` in `Bsp_Gpio_Init()` and remove the safety-only GPIO-low helper; boot MOS self-test becomes unconditional again after offset calibration.
+- PA14 must no longer be wired as a grounding switch once LED drive is restored; communicated the hardware consequence to the user.
+- ADC/TIM14 ISR safety wrappers can be removed without changing ADC capture, over-current detection or PA4 EXTI handler.
+- Header/global declarations for safety latch, brake activity, IPD activity and GPIO-low helper must be removed along with their implementations. Main IPD returns to its normal flag-driven call.
+
 ## Safety hard-brake synchronization
 - Latest user request supersedes the previous coast/all-six-low stopping interval. ON/OFF release now uses enabled `HBrake_En=1`; shared hard-brake hold is `HBrake_Time_MS_CNT` (400 ms), with the existing brake-to-stop state afterward.
 - Current `motor_safety_poll()` forces MOTOR_STOP, MOE-off and GPIO-low on every call, and every `Brake_Motor()` entry is guarded, so simply changing the state is insufficient.

@@ -66,12 +66,8 @@
 
 #define ON_START_PORT                   GPIOB
 #define ON_START_PIN                    GPIO_Pin_0
-/* ON/OFF：PB0 按下为高、松开为低；安全开关：PA14 按下为低。 */
+/* ON/OFF 数字输入：PB0 按下为高、松开为低，保留原启停配置。 */
 #define ON_OFF_PRESSED()            (GPIO_ReadInputDataBit(ON_START_PORT, ON_START_PIN) == Bit_SET)
-#define SAFETY_PORT                 GPIOA
-#define SAFETY_PIN                  GPIO_Pin_14
-#define SAFETY_PIN_SOURCE           GPIO_PinSource14
-#define SAFETY_PRESSED()            (GPIO_ReadInputDataBit(SAFETY_PORT, SAFETY_PIN) == Bit_RESET)
 
 
 //dir
@@ -185,7 +181,6 @@
 
 void Bsp_Gpio_Init(void);
 void Bsp_Pwm_Init(void);
-void Bsp_Pwm_Low(void); /* 六路桥臂引脚切换为普通低电平输出。 */
 void Peripheral_Init(void);
 void Interrupt_Init(void);
 void GPIO_Toggle(GPIO_TypeDef *GPIOn, uint16_t PINn);

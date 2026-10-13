@@ -27,11 +27,7 @@
 
 #define  SLEEP_TIME                 				15000ul//10000   
 #define LED_SCAN_EN       (1)
-/* PA14 专用于安全输入，关闭涉及 PA14 的 LED 驱动及电量、档位显示。 */
-#define LED_PA14_EN       (0)
-#if LED_PA14_EN
-#error PA14 LED drive conflicts with the safety switch
-#endif
+/* PA14 恢复为 LED 第三路引脚，正常扫描由 LED_SCAN_EN 控制。 */
 
 /* ON/OFF 检测：1 为 PB0 数字输入（高按下、低松开），0 为原 ADC 方式。 */
 #ifndef ON_OFF_DIGITAL_EN
@@ -83,7 +79,7 @@
 /* ---------------------------- Current Protect  ---------------------------------- */
 
 /* ------------------------------ 电流采样硬件参数 ---------------------------- */
-#define RSHUNT 												 1							/* 采样电阻 单位：mR */		
+#define RSHUNT 									0.5							/* 采样电阻 单位：mR */		
 #define AMPLIFICATION_GAIN 						 (float)(10.89)		/* 运放倍数 */		
 	
 //#define MAX_BUS_CURRENT_SETTINT        (float)(18.0)                                   						/* 限电流 单位：A */
@@ -100,22 +96,22 @@
 #define IBus_Avg_REC_MS               (200) //ms
 #define IBus_Avg_REC_MS_CONUT         (u16)((float)IBus_Avg_REC_MS*SLOWLOOP_FRE/1000.0f) 
 
-#define IBus_Avg_OCP1                (50.0f)
+#define IBus_Avg_OCP1                (80.0f)
 #define IBus_Avg_OCP1_AdcValue         (u16)(IBus_Avg_OCP1*CURRENT_ADC_PER_A)
 
-#define IBus_Avg_OCP1_MS               (2000) //ms
+#define IBus_Avg_OCP1_MS               (3000) //ms
 #define IBus_Avg_OCP1_MS_CONUT         (u16)((float)IBus_Avg_OCP1_MS*SLOWLOOP_FRE/1000.0f) 
 	
-#define IBus_Avg_OCP2                 (55.0f)
+#define IBus_Avg_OCP2                 (90.0f)
 #define IBus_Avg_OCP2_AdcValue         (u16)(IBus_Avg_OCP2*CURRENT_ADC_PER_A)
 
-#define IBus_Avg_OCP2_MS               (300) //ms
+#define IBus_Avg_OCP2_MS               (500) //ms
 #define IBus_Avg_OCP2_MS_CONUT        (u16)((float)IBus_Avg_OCP2_MS*SLOWLOOP_FRE/1000.0f) 
 
-#define IBus_Avg_OCP3                  (75.0f)
+#define IBus_Avg_OCP3                  (95.0f)
 #define IBus_Avg_OCP3_AdcValue         (u16)(IBus_Avg_OCP3*CURRENT_ADC_PER_A)
 
-#define IBus_Avg_OCP3_MS               (20) //ms
+#define IBus_Avg_OCP3_MS               (30) //ms
 #define IBus_Avg_OCP3_MS_CONUT        (u16)((float)IBus_Avg_OCP3_MS*SLOWLOOP_FRE/1000.0f)
 #define Mos_overload_EN (0)  //mos过载保护使能
 
@@ -135,22 +131,22 @@
 
 #if Block_Protect_Current_En
 
-#define Block_Protect_MAX_TIME                     (80*SLOWLOOP_1ms_CNT_LOAD)/*堵转时间unit:ms*/
-#define Block_Protect_Current1                      (35.00)/*unit:a*/ 
+#define Block_Protect_MAX_TIME                     (100*SLOWLOOP_1ms_CNT_LOAD)/*堵转时间unit:ms*/
+#define Block_Protect_Current1                      (95.00)/*unit:a*/ 
 #define Block_Protect_Current1_AdcValue             (u16)(Block_Protect_Current1*CURRENT_ADC_PER_A)
 #define Block_Protect_Current1_TIME                 (80*SLOWLOOP_1ms_CNT_LOAD)/*堵转时间unit:ms*/
 
 
-#define Block_Protect_Current2                      (55.00)/*unit:a*/ 
+#define Block_Protect_Current2                      (105.00)/*unit:a*/ 
 #define Block_Protect_Current2_AdcValue             (u16)(Block_Protect_Current2*CURRENT_ADC_PER_A)
 #define Block_Protect_Current2_TIME                 (50*SLOWLOOP_1ms_CNT_LOAD)/*堵转时间unit:ms*/
 
 
-#define Block_Protect_Current3                      (75.00)/*unit:a*/ 
+#define Block_Protect_Current3                      (110.00)/*unit:a*/ 
 #define Block_Protect_Current3_AdcValue             (u16)(Block_Protect_Current3*CURRENT_ADC_PER_A)
 #define Block_Protect_Current3_TIME                 (50*SLOWLOOP_1ms_CNT_LOAD)/*堵转时间unit:ms*/
 
-#define Block_Protect_Current4                      (90.00)/*unit:a*/ 
+#define Block_Protect_Current4                      (120.00)/*unit:a*/ 
 #define Block_Protect_Current4_AdcValue             (u16)(Block_Protect_Current4*CURRENT_ADC_PER_A)
 #define Block_Protect_Current4_TIME                 (10*SLOWLOOP_1ms_CNT_LOAD)/*堵转时间unit:ms*/
 
@@ -168,17 +164,17 @@
 
 #if Multistage_Peak_OCP_EN
 
-#define IBus_Smart_Peak_OCP1                      (90.00)/*unit:a*/ 
+#define IBus_Smart_Peak_OCP1                      (120.00)/*unit:a*/ 
 	#define IBus_Smart_Peak_OCP1_AdcValue             (u16)(IBus_Smart_Peak_OCP1*CURRENT_ADC_PER_A)
 	#define IBus_Smart_Peak_OCP1_MS                   (550) //ms
 	#define IBus_Smart_OCP1_MS_Operation_Value        (u16)(32768.0f/((float)IBus_Smart_Peak_OCP1_MS*SLOWLOOP_FRE/1000.0f))
 
-	#define IBus_Smart_Peak_OCP2                      (100.00)/*unit:a*/ 
+	#define IBus_Smart_Peak_OCP2                      (130.00)/*unit:a*/ 
 	#define IBus_Smart_Peak_OCP2_AdcValue             (u16)(IBus_Smart_Peak_OCP2*CURRENT_ADC_PER_A)
 	#define IBus_Smart_Peak_OCP2_MS                   (100) //ms
 	#define IBus_Smart_OCP2_MS_Operation_Value        (u16)(32768.0f/((float)IBus_Smart_Peak_OCP2_MS*SLOWLOOP_FRE/1000.0f))
 		
-	#define IBus_Smart_Peak_OCP3                      (110.00)/*unit:a*/ 
+	#define IBus_Smart_Peak_OCP3                      (140.00)/*unit:a*/ 
 	#define IBus_Smart_Peak_OCP3_AdcValue             (u16)(IBus_Smart_Peak_OCP3*CURRENT_ADC_PER_A)
 	#define IBus_Smart_Peak_OCP3_MS                   (10) //ms
 	#define IBus_Smart_OCP3_MS_Operation_Value        (u16)(32768.0f/((float)IBus_Smart_Peak_OCP3_MS*SLOWLOOP_FRE/1000.0f))
@@ -206,9 +202,12 @@
 #define LIMIT_PEAK_CURRENT_AdcValue         (u16)(LIMIT_PEAK_CURRENT*CURRENT_ADC_PER_A)
 
 
-#define LIMIT_AVG_CURRENT_EN               (0)
-#define LIMIT_AVG_CURRENT                  (62.0f)
+/* 平均电流限流目标为 63A，原有各级过流保护保持不变。 */
+#define LIMIT_AVG_CURRENT_EN               (1)
+#define LIMIT_AVG_CURRENT                  (63.0f)
 #define LIMIT_AVG_CURRENT_AdcValue         (u16)(LIMIT_AVG_CURRENT*CURRENT_ADC_PER_A)
+/* 仅限制高占空比运行时的平均限流下降，不改变全局及启动最低占空比。 */
+#define LIMIT_AVG_CURRENT_MIN_DUTY          ((u16)(PWM_PRIOD_LOAD*0.83f))
 
 
 #define LIMIT_PROTECT_EN               (0)
@@ -298,8 +297,8 @@
 #define MOS_TEMP_OVER_TIME     					50  			/* 单位：ms */  
 #define RSM_MOS_TEMP_OVER_TIME 					100  			/* 单位：ms */  
 /* 将用户设定值转换为ADC采样值 */
-#define MOS_TEMP_OVER_RES_RATIO					(float)(RT_100_F/(RT_100_F +MOS_TEMP_UP_RES)) 								// 分压比 (下拉电阻/(上拉电阻+下拉电阻))
-#define RSM_MOS_TEMP_OVER_RES_RATIO			(float)(RT_95_F/(RT_95_F + MOS_TEMP_UP_RES)) 				// 分压比 (下拉电阻/(上拉电阻+下拉电阻))
+#define MOS_TEMP_OVER_RES_RATIO					(float)(RT_110_F/(RT_110_F +MOS_TEMP_UP_RES)) 								// 分压比 (下拉电阻/(上拉电阻+下拉电阻))
+#define RSM_MOS_TEMP_OVER_RES_RATIO			(float)(RT_105_F/(RT_105_F + MOS_TEMP_UP_RES)) 				// 分压比 (下拉电阻/(上拉电阻+下拉电阻))
 #define MOS_TEMP_OVER_THD_ADC       		(u16)(MOS_TEMP_OVER_RES_RATIO * MOS_TEMP_UP_VOL * ADC_REF_VALUE / ADC_REFV)			// 计算出过温保护门槛值
 #define RSM_MOS_TEMP_OVER_THD_ADC   		(u16)(RSM_MOS_TEMP_OVER_RES_RATIO * MOS_TEMP_UP_VOL * ADC_REF_VALUE / ADC_REFV)	// 计算出解除过温保护门槛值
 

@@ -214,11 +214,8 @@ void ADC_IRQHandler(void)
 			
 			}
 		#endif
-                /* 保留 ADC 采样及过流处理，锁定时禁止进入电机库换相。 */
-                if(!motor_safety_poll())
-                {
-                    mc_core_adc_isr_handle();
-                }
+			/* 保留 ADC 采样和过流保护，正常调用电机核心处理。 */
+			mc_core_adc_isr_handle();
 				
 //				GPIO_Toggle(GPIOA,GPIO_Pin_4);
         ADC_ClearITPendingBit(ADC1, ADC_IT_EOC);
@@ -231,11 +228,8 @@ void TIM14_IRQHandler(void)
     if (RESET != TIM_GetITStatus(TIM14, TIM_IT_Update))
     {
 		
-            /* 已挂起的换相定时中断也必须服从安全锁定。 */
-            if(!motor_safety_poll())
-            {
-                mc_core_timer14_isr_handle();
-            }
+		/* 恢复原换相定时处理，不再附加安全开关轮询。 */
+		mc_core_timer14_isr_handle();
       TIM_ClearITPendingBit(TIM14, TIM_IT_Update);
     
 	}

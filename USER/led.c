@@ -14,15 +14,13 @@ void LED4_BRIGHT(void);
 void LED5_BRIGHT(void);
 void LED6_BRIGHT(void);
 
-/* 关闭所有需要驱动或扫描 PA14 的 LED 路径，避免改写安全输入。 */
-#if LED_PA14_EN
+/* 恢复 PA14 参与的六路 LED 扫描，沿用原灯位映射。 */
 #define LED1_BRIGHT_MAP LED5_BRIGHT()
 #define LED2_BRIGHT_MAP LED4_BRIGHT()
 #define LED3_BRIGHT_MAP LED6_BRIGHT()
 #define LED4_BRIGHT_MAP LED3_BRIGHT()
 #define LED5_BRIGHT_MAP LED2_BRIGHT()
 #define LED6_BRIGHT_MAP LED1_BRIGHT()
-#endif
 
 
 #define LED_ERROR_ON                	         {LED1 = LED2 = LED3 = led_on;}
@@ -36,18 +34,11 @@ void led_init(void)
     RCC_AHBPeriphClockCmd(RCC_AHBENR_GPIOA, ENABLE);
 
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource13, GPIO_AF_7);
-/* 关闭所有需要驱动或扫描 PA14 的 LED 路径，避免改写安全输入。 */
-#if LED_PA14_EN
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource14, GPIO_AF_7);
-#endif
 
     GPIO_StructInit(&GPIO_InitStruct);
-    /* 故障报警仅使用 PA1/PA13，不再将 PA14 初始化为输出。 */
-    GPIO_InitStruct.GPIO_Pin = LED_PIN1 | LED_PIN2;
-/* 关闭所有需要驱动或扫描 PA14 的 LED 路径，避免改写安全输入。 */
-#if LED_PA14_EN
-    GPIO_InitStruct.GPIO_Pin |= LED_PIN3;
-#endif
+    /* PA1、PA13、PA14 恢复为三线复用 LED 引脚。 */
+    GPIO_InitStruct.GPIO_Pin = LED_PIN1 | LED_PIN2 | LED_PIN3;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_High;
     GPIO_InitStruct.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -114,10 +105,7 @@ void LED1_BRIGHT(void)
 {
 		LED_PIN1_OUT();	
 		LED_PIN2_OUT();
-/* 关闭所有需要驱动或扫描 PA14 的 LED 路径，避免改写安全输入。 */
-#if LED_PA14_EN
 		LED_PIN3_IN();
-#endif
 	
 		LED_PIN1_HIGHT();
 		LED_PIN2_LOW();
@@ -127,10 +115,7 @@ void LED2_BRIGHT(void)
 {
 		LED_PIN1_OUT();	
 		LED_PIN2_OUT();
-/* 关闭所有需要驱动或扫描 PA14 的 LED 路径，避免改写安全输入。 */
-#if LED_PA14_EN
 		LED_PIN3_IN();
-#endif
 	
 		LED_PIN1_LOW();
 		LED_PIN2_HIGHT();
@@ -138,8 +123,6 @@ void LED2_BRIGHT(void)
 }
 
 
-/* 关闭所有需要驱动或扫描 PA14 的 LED 路径，避免改写安全输入。 */
-#if LED_PA14_EN
 void LED3_BRIGHT(void)
 {
 		LED_PIN1_OUT();	
@@ -247,45 +230,10 @@ void LED_Scan(void)
 
 
 
-#else
-void LED_Scan(void)
-{
-    static uint8_t direction = 0;
-    /* PA1/PA13 之间的两只灯交替扫描，沿用原故障闪烁节奏。 */
-    LED_PIN1_IN();
-    LED_PIN2_IN();
-    direction ^= 1;
-    if(LED1)
-    {
-        if(direction)
-        {
-            LED1_BRIGHT();
-        }
-        else
-        {
-            LED2_BRIGHT();
-			
-        }
-    }
-}
-#endif
 
 void UO_Led_Handler(void)
 {
-/* 仅保留故障报警，取消电量和档位显示；档位控制功能不变。 */
-#if !LED_PA14_EN
-    if(user_list.user_state != TOOL_POWER_DOWN &&
-       LedError_Control() && user_list.flag.bits.gToolTrigger)
-    {
-        LedError_Run();
-    }
-    else
-    {
-        ledData.Word = 0;
-        user_led_control.LedDeal = 0;
-        user_led_control.LedRunTimes = 0;
-    }
-#else
+	/* 恢复原有电量、档位和故障显示，包含 LED3。 */
 
 
 	if(user_list.user_state == TOOL_POWER_DOWN)
@@ -315,7 +263,7 @@ void UO_Led_Handler(void)
 			user_led_control.LedRunTimes=0;
 //			if(user_list.user_state!=TOOL_RUN)
 //			{
-				LedSoc_Run(user_list.VBus_Vx100,1,0);
+//				LedSoc_Run(user_list.VBus_Vx100,1,0);
 //			}
 //			else 
 //			{
@@ -326,28 +274,29 @@ void UO_Led_Handler(void)
 //			LED4_OFF;
 //			LED5_OFF;
 //			LED6_OFF;
-		#if 1
-			if(user_list.gears_level==0)
-			{
-				LED4_ON;
-				LED5_OFF;
-				LED6_OFF;
-			}
-			else if(user_list.gears_level==1)
-			{
-				LED4_ON;
-				LED5_ON;
-				LED6_OFF;
+		#if 0
+		if(user_list.gears_level==0)
+		{
+			LED4_ON;
+			LED5_OFF;
+			LED6_OFF;
+		}
+		else if(user_list.gears_level==1)
+		{
+			LED4_ON;
+			LED5_ON;
+			LED6_OFF;
+		
+		}
+		else 
+		{
+			LED4_ON;
+			LED5_ON;
+			LED6_ON;
+		
+		}
+		#endif
 			
-			}
-			else 
-			{
-				LED4_ON;
-				LED5_ON;
-				LED6_ON;
-			
-			}
-			#endif
 		#if 0
 		if(user_list.flag.bits.gToolDir==Tool_Dir_CW_Value)
 		{
@@ -379,17 +328,13 @@ void UO_Led_Handler(void)
 			}
 		}
 		#endif
-		
-		
 
-		//
 	}
 
 
 	
 
 	
-#endif
 }
 
 

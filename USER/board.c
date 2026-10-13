@@ -56,39 +56,7 @@ void Bsp_Adc_Init(void)
     GPIO_Init(ON_START_PORT, &GPIO_InitStructure);
 }
 
-/* PA14 按下为低，使用上拉输入；周期读取 IO，不配置外部中断。 */
-static void Bsp_Safety_Init(void)
-{
-    GPIO_InitTypeDef GPIO_InitStructure;
-    RCC_AHBPeriphClockCmd(RCC_AHBENR_GPIOA, ENABLE);
-    GPIO_PinAFConfig(SAFETY_PORT, SAFETY_PIN_SOURCE, GPIO_AF_7);
-    GPIO_StructInit(&GPIO_InitStructure);
-    GPIO_InitStructure.GPIO_Pin = SAFETY_PIN;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-    GPIO_Init(SAFETY_PORT, &GPIO_InitStructure);
-    /* 上电已按住安全开关，先锁定，后续不得执行桥臂通电自检。 */
-    if(SAFETY_PRESSED())
-    {
-        safety_stop_latched = 1;
-    }
-}
-
-void Bsp_Pwm_Low(void)
-{
-    /* 本板六路桥臂为 PA0/5/6/8/9/10，切成低电平 GPIO，防止库重新使能 PWM。 */
-    GPIO_ResetBits(GPIOA, BLDC1_UH_PIN | BLDC1_VH_PIN | BLDC1_WH_PIN |
-                         BLDC1_UL_PIN | BLDC1_VL_PIN | BLDC1_WL_PIN);
-    MODIFY_REG(GPIOA->CRL,
-        GPIO_CRL_MODE0 | GPIO_CRL_CNF0 | GPIO_CRL_MODE5 | GPIO_CRL_CNF5 |
-        GPIO_CRL_MODE6 | GPIO_CRL_CNF6,
-        GPIO_CRL_MODE0_0 | GPIO_CRL_MODE5_0 | GPIO_CRL_MODE6_0);
-    MODIFY_REG(GPIOA->CRH,
-        GPIO_CRH_MODE8 | GPIO_CRH_CNF8 | GPIO_CRH_MODE9 | GPIO_CRH_CNF9 |
-        GPIO_CRH_MODE10 | GPIO_CRH_CNF10,
-        GPIO_CRH_MODE8_0 | GPIO_CRH_MODE9_0 | GPIO_CRH_MODE10_0);
-}
-
-/* 调用方先关闭 MOE 和通道；安全锁定时仅专用硬刹车入口可恢复桥臂复用。 */
+/* 初始化六路 PWM 复用引脚；PA14 由 LED 驱动管理。 */
 void Bsp_Pwm_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -276,9 +244,8 @@ void EN_Port_Out_L(void)
 void Bsp_Gpio_Init(void)
 {
 	
-    /* 上电先采样安全开关并保持六路输出低电平，再初始化其余 IO。 */
-    Bsp_Safety_Init();
-    Bsp_Pwm_Low();
+	/* 恢复正常 PWM 初始化，PA14 不再作为安全开关输入。 */
+	Bsp_Pwm_Init();
     Bsp_Adc_Init();
 	led_init();
 //	Bsp_dir_init();
