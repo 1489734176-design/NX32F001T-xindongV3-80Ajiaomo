@@ -281,6 +281,9 @@
 #define RT_100_F 6.601f
 #define RT_104_5_F 5.71f
 #define RT_105_F 5.694f
+
+#define RT_108_F 5.224f
+
 #define RT_110_F 4.929f
 #define RT_115_F 4.280f
 #define RT_120_F 3.728f
@@ -298,7 +301,7 @@
 #define RSM_MOS_TEMP_OVER_TIME 					100  			/* 单位：ms */  
 /* 将用户设定值转换为ADC采样值 */
 #define MOS_TEMP_OVER_RES_RATIO					(float)(RT_110_F/(RT_110_F +MOS_TEMP_UP_RES)) 								// 分压比 (下拉电阻/(上拉电阻+下拉电阻))
-#define RSM_MOS_TEMP_OVER_RES_RATIO			(float)(RT_105_F/(RT_105_F + MOS_TEMP_UP_RES)) 				// 分压比 (下拉电阻/(上拉电阻+下拉电阻))
+#define RSM_MOS_TEMP_OVER_RES_RATIO			(float)(RT_108_F/(RT_108_F + MOS_TEMP_UP_RES)) 				// 分压比 (下拉电阻/(上拉电阻+下拉电阻))
 #define MOS_TEMP_OVER_THD_ADC       		(u16)(MOS_TEMP_OVER_RES_RATIO * MOS_TEMP_UP_VOL * ADC_REF_VALUE / ADC_REFV)			// 计算出过温保护门槛值
 #define RSM_MOS_TEMP_OVER_THD_ADC   		(u16)(RSM_MOS_TEMP_OVER_RES_RATIO * MOS_TEMP_UP_VOL * ADC_REF_VALUE / ADC_REFV)	// 计算出解除过温保护门槛值
 
@@ -309,8 +312,8 @@
 
 
 
-#define Tool_Dir_CW_Value                                       (1)/*顺时针方向赋值*/
-#define Tool_Dir_CCW_Value                                      (0)/*逆时针方向赋值*/
+#define Tool_Dir_CW_Value                                       (0)/*顺时针方向赋值*/
+#define Tool_Dir_CCW_Value                                      (1)/*逆时针方向赋值*/
 #define Tool_Dir_Init                                           (0)/*逆时针方向赋值*/
 
 
